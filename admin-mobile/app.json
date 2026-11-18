@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Arsh Agro Admin",
+    "slug": "arsh-agro-admin",
+    "scheme": "arshagroadmin",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "platforms": ["android", "ios"],
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "com.arshagroindustry.admin",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.arshagroindustry.admin",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    }
+  }
+}

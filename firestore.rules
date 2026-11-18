@@ -1,0 +1,125 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Default-Deny Catch-All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Admin authorization check (including bootstrapped store admin)
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'saif.siddiqui2010@gmail.com' ||
+        request.auth.token.email == 'admin@arshagroindustry.com' ||
+        request.auth.token.email == 'arshagroindustry@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Connection validation test document
+    match /test/{testId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 2. Products Collection (Public view, Admin manage)
+    match /products/{productId} {
+      allow get, list: if true;
+
+      allow create: if isValidId(productId) && isAdmin() &&
+        incoming().name is string && incoming().name.size() <= 200 &&
+        incoming().price is number && incoming().price > 0 &&
+        incoming().mrp is number &&
+        incoming().size is string && incoming().size.size() <= 64;
+
+      allow update: if isValidId(productId) && isAdmin() &&
+        incoming().price is number && incoming().price > 0;
+
+      allow delete: if isValidId(productId) && isAdmin();
+    }
+
+    // 3. Orders Collection (Customer own orders, Admin manage)
+    match /orders/{orderId} {
+      allow get: if isValidId(orderId) && (
+        isAdmin() ||
+        (isSignedIn() && resource.data.userId == request.auth.uid)
+      );
+
+      allow list: if isSignedIn() && (
+        isAdmin() ||
+        resource.data.userId == request.auth.uid
+      );
+
+      allow create: if false;
+      allow update: if isValidId(orderId) && isAdmin();
+
+      allow delete: if isValidId(orderId) && isAdmin();
+    }
+
+    // 4. Users Collection (Owner access & Admin access)
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+
+      allow create: if isValidId(userId) && isOwner(userId) &&
+        incoming().name is string && incoming().name.size() <= 150 &&
+        incoming().email is string && incoming().email.size() <= 150;
+
+      allow update: if isValidId(userId) && (
+        (isOwner(userId) && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'phone', 'addresses', 'avatar'])) ||
+        isAdmin()
+      );
+
+      allow delete: if isValidId(userId) && (isOwner(userId) || isAdmin());
+    }
+
+    // 5. Wholesale Inquiries (Public submit, Admin manage)
+    match /inquiries/{inquiryId} {
+      allow create: if isValidId(inquiryId) &&
+        incoming().name is string && incoming().name.size() <= 150 &&
+        incoming().phone is string && incoming().phone.size() <= 32 &&
+        incoming().city is string && incoming().city.size() <= 100;
+
+      allow get, list, update, delete: if isAdmin();
+    }
+
+    // Published website content is public; other store settings remain admin-only.
+    match /settings/{settingId} {
+      allow read: if settingId == 'websiteContent' || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // 7. Admins Collection
+    match /admins/{adminId} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /admin_devices/{userId} {
+      allow read, write: if isAdmin() && request.auth.uid == userId;
+    }
+  }
+}

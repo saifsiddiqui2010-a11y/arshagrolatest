@@ -1,0 +1,6 @@
+{
+  "name": "Arsh Agro Industry | ArshSarso Pure Cold Pressed Mustard Oil",
+  "description": "Official store for Arsh Agro Industry and ArshSarso. Buy 100% pure, unrefined, cold-pressed Kachi Ghani and Peeli Sarso mustard oil directly from Siwan, Bihar.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

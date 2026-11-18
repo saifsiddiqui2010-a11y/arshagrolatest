@@ -1,0 +1,120 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Cold-pressed mustard oil or byproduct item sold by Arsh Agro Industry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 200 },
+        "category": { "type": "string", "enum": ["yellow-mustard", "kachi-ghani", "mustard-cake", "combo-packs"] },
+        "price": { "type": "number" },
+        "mrp": { "type": "number" },
+        "size": { "type": "string", "maxLength": 64 },
+        "image": { "type": "string", "maxLength": 1000 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "inStock": { "type": "boolean" },
+        "stockCount": { "type": "number" },
+        "featured": { "type": "boolean" },
+        "rating": { "type": "number" },
+        "reviewCount": { "type": "number" }
+      },
+      "required": ["name", "category", "price", "mrp", "size", "inStock"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer purchase order for ArshSarso products",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "customerName": { "type": "string", "maxLength": 150 },
+        "customerEmail": { "type": "string", "maxLength": 150 },
+        "customerPhone": { "type": "string", "maxLength": 32 },
+        "shippingAddress": { "type": "object" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "discount": { "type": "number" },
+        "deliveryFee": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "paymentMethod": { "type": "string", "enum": ["razorpay", "cod"] },
+        "razorpayOrderId": { "type": "string", "maxLength": 128 },
+        "razorpayPaymentId": { "type": "string", "maxLength": 128 },
+        "paymentStatus": { "type": "string", "enum": ["paid", "pending", "failed"] },
+        "orderStatus": { "type": "string", "enum": ["placed", "processing", "shipped", "delivered", "cancelled"] },
+        "courierName": { "type": "string", "maxLength": 100 },
+        "trackingNumber": { "type": "string", "maxLength": 100 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["userId", "customerName", "customerPhone", "items", "totalAmount", "paymentMethod", "paymentStatus", "orderStatus"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with contact info and saved addresses",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 150 },
+        "email": { "type": "string", "maxLength": 150 },
+        "phone": { "type": "string", "maxLength": 32 },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "avatar": { "type": "string", "maxLength": 1000 },
+        "addresses": { "type": "array" },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["name", "email", "role"]
+    },
+    "WholesaleInquiry": {
+      "title": "WholesaleInquiry",
+      "description": "B2B wholesale and dealership leads for Arsh Agro Industry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 150 },
+        "businessName": { "type": "string", "maxLength": 200 },
+        "phone": { "type": "string", "maxLength": 32 },
+        "email": { "type": "string", "maxLength": 150 },
+        "quantityNeeded": { "type": "string", "maxLength": 100 },
+        "city": { "type": "string", "maxLength": 100 },
+        "message": { "type": "string", "maxLength": 2000 },
+        "status": { "type": "string", "enum": ["new", "contacted", "closed"] },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["name", "phone", "city", "status"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Administrative users authorized to manage store operations",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 150 },
+        "role": { "type": "string", "enum": ["admin"] },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["uid", "email", "role"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Catalog of mustard oils and agricultural byproducts"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Customer purchase orders with payments and delivery tracking"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Registered customer profiles and saved addresses"
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/WholesaleInquiry" },
+      "description": "B2B dealership and bulk supply inquiries"
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/Admin" },
+      "description": "Store managers and mill operators with admin privileges"
+    }
+  }
+}

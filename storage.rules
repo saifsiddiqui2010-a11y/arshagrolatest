@@ -1,0 +1,22 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == 'saif.siddiqui2010@gmail.com' ||
+        request.auth.token.email == 'admin@arshagroindustry.com' ||
+        request.auth.token.email == 'arshagroindustry@gmail.com'
+      );
+    }
+
+    match /admin-uploads/{userId}/{imagePath=**} {
+      allow read: if true;
+      allow write: if isAdmin() &&
+        request.auth.uid == userId &&
+        request.resource != null &&
+        request.resource.size > 0 &&
+        request.resource.size <= 5 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/(jpeg|png|webp|gif)');
+    }
+  }
+}
